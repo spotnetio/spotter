@@ -1,0 +1,19 @@
+{
+  "name": "matcher",
+  "version": "1.0.0",
+  "description": "Matcher monitors onchain events, updates its inventory and matches borrowers to lenders",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "start": "nodemon server.js"
+  },
+  "author": "Marat",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^1.17.2"
+  },
+  "dependencies": {
+    "express": "^4.16.3",
+    "web3": "^0.20.0"
+  }
+}
