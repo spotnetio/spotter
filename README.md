@@ -1,0 +1,2 @@
+# spotter
+Spotter backend service
