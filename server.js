@@ -10,7 +10,7 @@ app.use(bodyParser.json());
 var routes = require('./api/routes/inventoryRoutes'); //importing route
 routes(app); //register the route
 
-var events = require('./api/listeners/events'); // register event listener
+// var events = require('./api/listeners/events'); // register event listener
 
 app.listen(port);
 
