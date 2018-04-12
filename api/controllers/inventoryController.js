@@ -13,6 +13,7 @@ exports.add_inventory = function(req, res) {
 	res.json(db.inventory.addInventory(
 		req.params.userId,
 		req.body.token,
-		req.body.amount
+		req.body.amount,
+		req.body.role,
 	));
 };
