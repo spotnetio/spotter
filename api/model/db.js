@@ -172,7 +172,21 @@ exports.inventory = {
 		}
 	},
 
-	recall(lender, token, amount) {
+	async recall(lender, token, amount) {
+		let tradersTokens = {};
+		let lendersTokens = {};
+        let traders = await App.vaultDeployed.getTraders();
+        let tokens = await App.vaultDeployed.getTokens();
+        traders.forEach(async function (t, i) {
+          tradersTokens[t+tokens[i]]=i;
+          let lenders = await App.vaultDeployed.getLenders(i);
+          lenders.forEach(function (l, j) {
+          	if (l == lender && tokens[i] == token) {
+           		lendersTokens[i+','+j]=await App.vaultDeployed.getAmount(i,j);
+            }
+          });
+        });
+
 		lenders = [];
 		amounts = [];
 loop1:
@@ -187,7 +201,7 @@ loop1:
 					amounts.push(swapAmount);
 					store[u][t]['lender'] -= swapAmount;
 					amount -= swapAmount
-					if (amount == 0) {
+					if (amount <= 0) {
 						break loop1;
 					}
 				}
