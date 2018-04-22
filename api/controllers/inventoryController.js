@@ -65,7 +65,7 @@ exports.add_inventory = function(req, res) {
 
 exports.recall = function(req, res) {
 	res.setHeader('Access-Control-Allow-Origin', CORS);
-	res.json(db.inventory.addInventory(
+	res.json(db.inventory.recall(
 		req.params.userId,
 		req.body.token,
 		req.body.amount,

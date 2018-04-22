@@ -174,59 +174,73 @@ exports.inventory = {
 
 	async recall(lender, token, amount) {
 		let tradersTokens = {};
-		let lendersTokens = {};
-        let traders = await App.vaultDeployed.getTraders();
-        let tokens = await App.vaultDeployed.getTokens();
-        traders.forEach(async function (t, i) {
+		let tradersLenders = {};
+		let lenderCoordinates = [];
+        let traders = await deployedSpot.getTraders();
+        let tokens = await deployedSpot.getTokens();
+      	let amtTemp = amount;
+      	for (let [i, t] of traders.entries()) {
+        // traders.forEach(async function (t, i) {
+		  if (amtTemp <= 0) {return;}
           tradersTokens[t+tokens[i]]=i;
-          let lenders = await App.vaultDeployed.getLenders(i);
-          lenders.forEach(function (l, j) {
+          let lenders = await deployedSpot.getLenders(i);
+		  tradersLenders[i] = lenders;
+  		  for (let [j, l] of lenders.entries()) {
+          // lenders.forEach(async function (l, j) {
+          	if (amtTemp <= 0) {return;}
           	if (l == lender && tokens[i] == token) {
-           		lendersTokens[i+','+j]=await App.vaultDeployed.getAmount(i,j);
+          		let amtLocked = await deployedSpot.getAmount(i,j);
+          		let amtMin = Math.min(amtLocked, amtTemp);
+           		lenderCoordinates.push([i,j,amtMin]); // lender coordinates & amount
+           		amtTemp -= amtMin;
             }
-          });
-        });
+          }
+        }
 
-		lenders = [];
-		amounts = [];
-loop1:
+		let borrTokIdx = [];
+		let lenderIdx = [];
+		let newLender = [];
+		let newLenderIdx = [];
+		let amts = [];
 		for (let u in store) {
 			for (let t in store[u]) {
-				swapAmount = Math.min(
-					store[u][t]['lender'], 
-					amount
-				);
-				if (t == token && swapAmount > 0) {
-					lenders.push(u);
-					amounts.push(swapAmount);
-					store[u][t]['lender'] -= swapAmount;
-					amount -= swapAmount
-					if (amount <= 0) {
-						break loop1;
+				if (t == token) {
+					for (let [i,lockedLender] of lenderCoordinates.entries()) {
+						let swapAmount = Math.min(
+							parseInt(store[u][t]['lender']), 
+							parseInt(lockedLender[2])
+						);
+						if (swapAmount > 0) {
+							borrTokIdx.push(lockedLender[0]);
+							lenderIdx.push(lockedLender[1]);
+							newLender.push(u);
+							newLenderIdx.push(tradersLenders[lockedLender[0]].indexOf(u));
+							amts.push(swapAmount);
+							store[u][t]['lender'] -= swapAmount;
+							lockedLender[2] -= swapAmount
+						}
 					}
 				}
 			}
 		}
 		deployedSpot.Swap(
-			lender,
-			token,
-			lenders,
-			amounts,
-			rate, 
-			fee,
-			margin
+			borrTokIdx,
+			lenderIdx,
+			newLender,
+			newLenderIdx,
+			amts
 		);
 
-		if (amount > 0) {
-			let borrowers, amounts = deployedSpot.Recall(
-				lender,
-				token,
-				amount
-			);
-			for (let i=0; i<borrowers.length; i++) {
-				store[borrowers[i]][token]['lender'] += amounts[i];
-			}
-		}
+		// if (amount > 0) {
+		// 	let borrowers, amounts = deployedSpot.Recall(
+		// 		lender,
+		// 		token,
+		// 		amount
+		// 	);
+		// 	for (let i=0; i<borrowers.length; i++) {
+		// 		store[borrowers[i]][token]['lender'] += amounts[i];
+		// 	}
+		// }
 	}
 };
 
