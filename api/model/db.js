@@ -1,3 +1,4 @@
+const R = require('ramda');
 const spotArtifact = require("../../../contracts/build/contracts/Spot.json");
 const TruffleContract = require("truffle-contract");
 const Web3 = require("web3");
@@ -105,6 +106,7 @@ exports.inventory = {
 					// subtract from inventory					
 					store[user][token]['trader'] -= x1Filled;
 					store[u][t]['lender'] -= x1Filled;
+					amount -= x1Filled;
 				}
 			}
 		}
@@ -167,6 +169,7 @@ exports.inventory = {
 					// subtract from inventory					
 					store[user][token]['lender'] -= x1Filled;
 					store[u][t]['trader'] -= x1Filled;
+					amount -= x1Filled;
 				}
 			}
 		}
@@ -179,15 +182,14 @@ exports.inventory = {
         let traders = await deployedSpot.getTraders();
         let tokens = await deployedSpot.getTokens();
       	let amtTemp = amount;
+MainLoop:
       	for (let [i, t] of traders.entries()) {
-        // traders.forEach(async function (t, i) {
-		  if (amtTemp <= 0) {return;}
+		  if (amtTemp <= 0) {break;}
           tradersTokens[t+tokens[i]]=i;
           let lenders = await deployedSpot.getLenders(i);
 		  tradersLenders[i] = lenders;
   		  for (let [j, l] of lenders.entries()) {
-          // lenders.forEach(async function (l, j) {
-          	if (amtTemp <= 0) {return;}
+          	if (amtTemp <= 0) {break MainLoop;}
           	if (l == lender && tokens[i] == token) {
           		let amtLocked = await deployedSpot.getAmount(i,j);
           		let amtMin = Math.min(amtLocked, amtTemp);
@@ -223,24 +225,42 @@ exports.inventory = {
 				}
 			}
 		}
+		console.log('Swap('+
+			JSON.stringify(borrTokIdx)+','+
+			JSON.stringify(lenderIdx)+','+
+			JSON.stringify(newLender)+','+
+			JSON.stringify(newLenderIdx)+','+
+			JSON.stringify(amts)+')');
 		deployedSpot.Swap(
 			borrTokIdx,
 			lenderIdx,
 			newLender,
 			newLenderIdx,
-			amts
+			amts,
+			{from: web3.eth.accounts[0], gas: 3000000}
 		);
 
-		// if (amount > 0) {
-		// 	let borrowers, amounts = deployedSpot.Recall(
-		// 		lender,
-		// 		token,
-		// 		amount
-		// 	);
-		// 	for (let i=0; i<borrowers.length; i++) {
-		// 		store[borrowers[i]][token]['lender'] += amounts[i];
-		// 	}
-		// }
+		deployedSpot.Swapped({fromBlock:'latest'},{}).watch(function(err, evnt) {
+			if (!err) {
+				lenderCoordinates = lenderCoordinates.filter(x => x[2] > 0);
+				if(R.sum(lenderCoordinates.map(x => x[2])) > 0) {
+					let b = lenderCoordinates.map(x => x[0]);
+					let l = lenderCoordinates.map(x => x[1]);
+					let a = lenderCoordinates.map(x => x[2]);
+					console.log('Recall('+
+						JSON.stringify(b)+','+
+						JSON.stringify(l)+','+
+						JSON.stringify(a)+')');
+					deployedSpot.Recall(
+						b,
+						l,
+						a,
+						{from: web3.eth.accounts[0], gas: 3000000}
+					);
+				}
+			} else {
+				console.error(err);
+			}
+		});
 	}
 };
-
