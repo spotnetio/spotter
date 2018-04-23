@@ -51,21 +51,21 @@ exports.inventory = {
 
 	async findTraderMatchAndLock(user, token) {
 		let lenders = [];
-		let traders = await deployedSpot.getTraders();
-		let lockedTokens = await deployedSpot.getTokens();
 		let amount = store[user][token]['trader'];
 		let amountEther = Math.floor(amount*rate*(fee + margin)/1000000);
-		let traderIdx = traders.indexOf(user);
-		if(traderIdx >= 0) {
-			if (lockedTokens[traderIdx] == token) {
-				lenders = await deployedSpot.getLenders(traderIdx);
-			}
-			else {
-				traderIdx = -1;
-			}
-		}
 		for (let u in store) {
 			for (let t in store[u]) {
+				let traders = await deployedSpot.getTraders();
+				let lockedTokens = await deployedSpot.getTokens();
+				let traderIdx = traders.indexOf(user);
+				if(traderIdx >= 0) {
+					if (lockedTokens[traderIdx] == token) {
+						lenders = await deployedSpot.getLenders(traderIdx);
+					}
+					else {
+						traderIdx = -1;
+					}
+				}
 				let x1Filled = Math.min(
 					amount,
 					store[u][t]['lender'] 
@@ -115,8 +115,6 @@ exports.inventory = {
 	async findLenderMatchAndLock(user, token) {
 		let amount = store[user][token]['lender'];
 		let amountEther = Math.floor(amount*rate*(fee + margin)/1000000);
-		let traders = await deployedSpot.getTraders();
-		let lockedTokens = await deployedSpot.getTokens();
 		for (let u in store) {
 			for (let t in store[u]) {
 				let x1Filled = Math.min(
@@ -131,6 +129,8 @@ exports.inventory = {
 					)
 				);
 				if (t == token && x1Filled > 0 && etherFilled > 0) {
+					let traders = await deployedSpot.getTraders();
+					let lockedTokens = await deployedSpot.getTokens();
 					let lenders = [];
 					let traderIdx = traders.indexOf(u);
 					if(traderIdx >= 0) {
@@ -179,25 +179,25 @@ exports.inventory = {
 		let tradersTokens = {};
 		let tradersLenders = {};
 		let lenderCoordinates = [];
-        let traders = await deployedSpot.getTraders();
-        let tokens = await deployedSpot.getTokens();
-      	let amtTemp = amount;
+		let traders = await deployedSpot.getTraders();
+		let tokens = await deployedSpot.getTokens();
+		let amtTemp = amount;
 MainLoop:
-      	for (let [i, t] of traders.entries()) {
-		  if (amtTemp <= 0) {break;}
-          tradersTokens[t+tokens[i]]=i;
-          let lenders = await deployedSpot.getLenders(i);
-		  tradersLenders[i] = lenders;
-  		  for (let [j, l] of lenders.entries()) {
-          	if (amtTemp <= 0) {break MainLoop;}
-          	if (l == lender && tokens[i] == token) {
-          		let amtLocked = await deployedSpot.getAmount(i,j);
-          		let amtMin = Math.min(amtLocked, amtTemp);
-           		lenderCoordinates.push([i,j,amtMin]); // lender coordinates & amount
-           		amtTemp -= amtMin;
-            }
-          }
-        }
+		for (let [i, t] of traders.entries()) {
+			if (amtTemp <= 0) {break;}
+			tradersTokens[t+tokens[i]]=i;
+			let lenders = await deployedSpot.getLenders(i);
+			tradersLenders[i] = lenders;
+			for (let [j, l] of lenders.entries()) {
+				if (amtTemp <= 0) {break MainLoop;}
+				if (l == lender && tokens[i] == token) {
+					let amtLocked = await deployedSpot.getAmount(i,j);
+					let amtMin = Math.min(amtLocked, amtTemp);
+					lenderCoordinates.push([i,j,amtMin]); // lender coordinates & amount
+					amtTemp -= amtMin;
+				}
+			}
+		}
 
 		let borrTokIdx = [];
 		let lenderIdx = [];
