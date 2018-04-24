@@ -21,4 +21,6 @@ module.exports = function(app) {
     .post(inventory.add_inventory);
   app.route('/recall/:userId')
     .post(inventory.recall);
+  app.route('/b2c/:userId')
+    .post(inventory.b2c);
 };

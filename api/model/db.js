@@ -262,5 +262,43 @@ MainLoop:
 				console.error(err);
 			}
 		});
+	},
+
+	async b2c(trader, token, amount) {
+		let lenderList = [];
+		let amountList = [];
+		let tokens = await deployedSpot.getTokens();
+		let traders = await deployedSpot.getTraders();
+		let traderIdx = traders.map((x,i) => x==trader ? i : '').filter(String);
+		traderIdx = traderIdx.map((x,i) => tokens[i]==token ? i : '').filter(String)[0];
+		let lndrs = await deployedSpot.getLenders(traderIdx);
+		let amtTemp = amount;
+
+		for (let [j, l] of lndrs.entries()) {
+			if (amtTemp <= 0) { break; }
+			let amtLocked = await deployedSpot.getAmount(traderIdx,j);
+			let amtMin = Math.min(amtLocked, amtTemp);
+			lenderList.push(j); // lender coordinates 
+			amountList.push(amtMin); // lender amount
+			amtTemp -= amtMin;
+		}
+		console.log('BuyToCover('+
+			JSON.stringify(traderIdx)+','+
+			JSON.stringify(lenderList)+','+
+			JSON.stringify(amountList)+','+
+			JSON.stringify(amount)+','+
+			JSON.stringify(rate)+','+
+			JSON.stringify(fee)+','+
+			JSON.stringify(margin)+')');
+		deployedSpot.BuyToCover(
+			traderIdx,
+			lenderList,
+			amountList,
+			amount,
+			rate,
+			fee,
+			margin,
+			{from: web3.eth.accounts[0], gas: 3000000}
+		);
 	}
 };
