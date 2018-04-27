@@ -1,5 +1,5 @@
 var HDWalletProvider = require("truffle-hdwallet-provider");
-var config = require("../../secrets.js").config;
+var config = require("../../config/secrets.js").config;
 
 const R = require('ramda');
 const spotArtifact = require("../../../contracts/build/contracts/Spot.json");

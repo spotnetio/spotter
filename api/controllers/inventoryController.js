@@ -2,7 +2,7 @@
 import { getContracts } from "../../contracts";
 
 var db = require('../model/db');
-var CORS = 'http://localhost:8000';
+var CORS = '*';// 'http://localhost:8000';
 let TOKENS_LIST = [
 	'EosToken', 
 	'VenToken',
