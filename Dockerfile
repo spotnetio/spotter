@@ -10,6 +10,7 @@ RUN apt-get install -y git
 RUN apt-get install -y build-essential
 RUN npm install -g httpserver
 RUN echo "HELLO WORLD!!"
+RUN echo "HELLO WORLD!!2"
 ARG password
 RUN git clone https://maratbunyatov:$password@github.com/spotnetio/ui.git
 RUN git clone https://maratbunyatov:$password@github.com/spotnetio/spotter.git
@@ -29,6 +30,6 @@ VOLUME ["/logs"]
 CMD /spotter/bin/start.sh 
 
 # docker build --build-arg password=<> . -t maratbunyatov/spotnet
-# docker run -d --rm -p 3001:3001 -p 8080:8080 348196e38083
+# docker run -d --rm -p 3001:3001 -p 80:80 348196e38083
 # docker run -d -i -t -p 8000:8000 -p 3001:3001 --entrypoint /bin/bash 186166c8e71c
 # docker exec -it 2e09e889dde5 /bin/bash

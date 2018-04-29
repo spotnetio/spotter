@@ -77,6 +77,6 @@ exports.b2c = function(req, res) {
 	res.json(db.inventory.b2c(
 		req.params.userId,
 		req.body.token,
-		req.body.amount,
+		parseInt(req.body.amount),
 	));
 };

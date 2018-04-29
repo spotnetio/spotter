@@ -274,8 +274,7 @@ MainLoop:
 		let amountList = [];
 		let tokens = await deployedSpot.getTokens();
 		let traders = await deployedSpot.getTraders();
-		let traderIdx = traders.map((x,i) => x==trader ? i : '').filter(String);
-		traderIdx = traderIdx.map((x,i) => tokens[i]==token ? i : '').filter(String)[0];
+		let traderIdx = traders.map((x,i) => x==trader && tokens[i]==token ? i : '').filter(String);
 		let lndrs = await deployedSpot.getLenders(traderIdx);
 		let amtTemp = amount;
 
