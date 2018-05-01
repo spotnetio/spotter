@@ -181,6 +181,14 @@ exports.inventory = {
 	},
 
 	async recall(lender, token, amount) {
+		let minAmt = Math.min(
+			store[lender][token]['lender'],
+			amount
+		);
+		store[lender][token]['lender'] -= minAmt;
+		amount -= amount;
+		if (amount == 0) return;
+
 		let tradersTokens = {};
 		let tradersLenders = {};
 		let lenderCoordinates = [];
@@ -270,6 +278,14 @@ MainLoop:
 	},
 
 	async b2c(trader, token, amount) {
+		let minAmt = Math.min(
+			store[trader][token]['trader'],
+			amount
+		);
+		store[trader][token]['trader'] -= minAmt;
+		amount -= amount;
+		if (amount == 0) return;
+
 		let lenderList = [];
 		let amountList = [];
 		let tokens = await deployedSpot.getTokens();
