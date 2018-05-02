@@ -181,14 +181,17 @@ exports.inventory = {
 	},
 
 	async recall(lender, token, amount) {
-		let minAmt = Math.min(
-			store[lender][token]['lender'],
-			amount
-		);
-		store[lender][token]['lender'] -= minAmt;
-		amount -= amount;
-		if (amount == 0) return;
-
+		if(lender in store 
+			&& token in store[lender] 
+			&& 'lender' in store[lender][token]) {
+			let minAmt = Math.min(
+				store[lender][token]['lender'],
+				amount
+			);
+			store[lender][token]['lender'] -= minAmt;
+			amount -= minAmt;
+			if (amount == 0) return;
+		}
 		let tradersTokens = {};
 		let tradersLenders = {};
 		let lenderCoordinates = [];
@@ -278,14 +281,17 @@ MainLoop:
 	},
 
 	async b2c(trader, token, amount) {
-		let minAmt = Math.min(
-			store[trader][token]['trader'],
-			amount
-		);
-		store[trader][token]['trader'] -= minAmt;
-		amount -= amount;
-		if (amount == 0) return;
-
+		if(trader in store 
+			&& token in store[trader] 
+			&& 'trader' in store[trader][token]) {
+			let minAmt = Math.min(
+				store[trader][token]['trader'],
+				amount
+			);
+			store[trader][token]['trader'] -= minAmt;
+			amount -= minAmt;
+			if (amount == 0) return;
+		}
 		let lenderList = [];
 		let amountList = [];
 		let tokens = await deployedSpot.getTokens();
