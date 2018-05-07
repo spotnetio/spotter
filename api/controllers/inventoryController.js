@@ -7,8 +7,16 @@ let TOKENS_LIST = [
 	'EOS', 
 	'BNB',
   	'TRX',
-  	'ZeroX'
+  	'OMG'
 ];
+
+exports.inventoryByToken = function(req, res) {
+	res.setHeader('Access-Control-Allow-Origin', CORS);
+	let role = req.params.role;
+	res.json(
+		db.inventory.inventoryByToken(role)
+	);
+}
 
 exports.tokens = function(req, res) {
 	res.setHeader('Access-Control-Allow-Origin', CORS);

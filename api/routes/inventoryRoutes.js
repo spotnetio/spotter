@@ -5,6 +5,8 @@ module.exports = function(app) {
   var inventory = require('../controllers/inventoryController');
 
   // inventory Routes
+  app.route('/inventory_by_token/:role')
+    .get(inventory.inventoryByToken);
   app.route('/tokens/')
     .get(inventory.tokens);
   app.route('/tokens/:token')

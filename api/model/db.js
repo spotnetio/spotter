@@ -5,11 +5,14 @@ const R = require('ramda');
 const spotArtifact = require("../../../contracts/build/contracts/Spot.json");
 const TruffleContract = require("truffle-contract");
 const Web3 = require("web3");
-const networkUrl = "https://ropsten.infura.io/";//"http://localhost:9545";
-const provider = new HDWalletProvider(config["mnemonic"]["ropsten"], networkUrl+config["infura_apikey"]); //new Web3.providers.HttpProvider(networkUrl);
+const networkUrl = "https://ropsten.infura.io/";
+// const networkUrl = "http://localhost:9545";;
+const provider = new HDWalletProvider(config["mnemonic"]["ropsten"], networkUrl+config["infura_apikey"]); 
+// const provider = new Web3.providers.HttpProvider(networkUrl);
 const web3 = new Web3(provider);
 let defaultAccount;
-web3.eth.getAccounts((error, result) =>{defaultAccount = result[0]; console.log(defaultAccount);})
+web3.eth.getAccounts((error, result) =>{defaultAccount = result[0]; console.log(result);})
+// defaultAccount = web3.eth.accounts[0];
 // get the contract artifact file and use it to instantiate a truffle contract abstraction
 let spotContract = TruffleContract(spotArtifact);
 // set the provider for our contracts
@@ -31,8 +34,21 @@ exports.inventory = {
 	getStore: function() {
 		return store;
 	},
+	inventoryByToken: function(role) {
+		let result = {};
+		for (let u in store) {
+			for (let t in store[u]) {
+				if (t in result) {
+					result[t] += store[u][t][role]
+				}
+				else {
+					result[t] = store[u][t][role]
+				}
+			}
+		}
+		return result;
+	},
 	addInventory: function(user, token, amount, role) {
-		// console.log('addInventory amount '+amount);
 		let counterpartRole = role == 'lender' ? 'trader' : 'lender';
 		if (store[user] === undefined) {
 			store[user] = {};
@@ -45,7 +61,6 @@ exports.inventory = {
 		else {
 			store[user][token][role] += parseInt(amount);
 		}
-		// console.log('store[user][token][role] '+store[user][token][role]);
 		if(role == 'lender') {
 			this.findLenderMatchAndLock(user, token);
 		}
