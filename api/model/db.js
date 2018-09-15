@@ -1,14 +1,14 @@
-var HDWalletProvider = require("truffle-hdwallet-provider");
+// var HDWalletProvider = require("truffle-hdwallet-provider");
 var config = require("../../config/secrets.js").config;
 
 const R = require('ramda');
 const spotArtifact = require("../../../contracts/build/contracts/Spot.json");
 const TruffleContract = require("truffle-contract");
 const Web3 = require("web3");
-const networkUrl = "https://ropsten.infura.io/";
-// const networkUrl = "http://localhost:9545";;
-const provider = new HDWalletProvider(config["mnemonic"]["ropsten"], networkUrl+config["infura_apikey"]); 
-// const provider = new Web3.providers.HttpProvider(networkUrl);
+// const networkUrl = "https://ropsten.infura.io/";
+const networkUrl = "http://localhost:9545";;
+// const provider = new HDWalletProvider(config["mnemonic"]["ropsten"], networkUrl+config["infura_apikey"]); 
+const provider = new Web3.providers.HttpProvider(networkUrl);
 const web3 = new Web3(provider);
 let defaultAccount;
 web3.eth.getAccounts((error, result) =>{defaultAccount = result[0]; console.log(result);})

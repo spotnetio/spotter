@@ -10,7 +10,7 @@ RUN apt-get install -y git
 RUN apt-get install -y build-essential
 RUN npm install -g httpserver
 ARG password
-RUN echo "HELLO WORLD!"
+RUN echo "HELLO WORLD!!!!"
 RUN git clone https://maratbunyatov:$password@github.com/spotnetio/ui.git
 RUN git clone https://maratbunyatov:$password@github.com/spotnetio/spotter.git
 RUN git clone https://maratbunyatov:$password@github.com/spotnetio/contracts.git
